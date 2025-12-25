@@ -8,3 +8,44 @@ donde hostear tu servicio de KAFKA, ya sea en un EC2, en un MSK de amazon o en u
 Cuestión de costos y arquitectura.
 
 Implementaremos el SDK de SQS y SNS tomando como base los dos micros de la práctica de kube y docker.
+
+
+# Avances 25/12/2025 
+
+Después de sufrir una indigestión por comer costillas, decidí para no empacharme darme un buseo nocturno por la documentación de AWS.
+El único desafio fue confirmar si estaba configurando bien mis credenciales para el CLI, además de batallar con el POM (sorry por chatgepetear en eso).
+
+De ahí en fuera la conexión hasta ahora en micro A es super sencilla. Creo es menos batalloso este tema que Kafka honestamente, traeré updates más adelante.
+
+Configura un IAM user con access key, con el permiso AmazonSQSFullAccess y la politica anhidada PowerUserAccess
+
+<img width="1061" height="1041" alt="image" src="https://github.com/user-attachments/assets/57b002b9-ffa9-44cd-be82-171a1549bcc8" />
+
+En la carpeta de windows en este caso, solo asegurate que se te generaron bien las credes
+
+<img width="1024" height="296" alt="image" src="https://github.com/user-attachments/assets/4afe0eb8-fd70-40de-8295-bf9bbf610965" />
+
+También puedes comprobar tus access key con el comando aws sts get-caller-identity.
+
+La gracia cae sobre la configuración, en una instancia ECS las credes se guardan en otro directorio de Linux y para el SDK es importante configurar más que nada
+algo denominado credenciales temporales. A nivel Kubernetes eso se hace con IAM IRSA, que se configura con un tag en el yaml del type: ServiceAccout. Eso o rotarlas manual, pedirselo eso
+al encargado de infra si tienen una organización bastante defragmentada.
+
+De ahí en fuera, parece ser más sencillo que el mismo Kafka, y claro no tiene la misma potencia:
+
+<img width="1865" height="829" alt="image" src="https://github.com/user-attachments/assets/5c4c94e7-6e29-4357-8c18-f99f67f1d8e4" />
+
+Diferencias de Kafka y SQS
+
+*Kafka aguanta más datos y concurrencia, diseñado para alto trafico, y guarda los mensajes por intervalos largos de tiempo, ideal en etls también.
+*Retry's nativos para envio de mensaje, poca latencia si no activas los ACK's.
+
+SQS
+*Ideal para lambdas o procesos chiquitos/medianos, colas sencillas que se comunican con el ecosistema de AWS directamente, haciendolo
+una implementación del propio stack de AWS, puedes usar S3, y cosas asi.
+*No retiene por mucho tiempo los mensajes.
+*Pueden perderse los mensajes, existe ese riesgo.
+
+<img width="580" height="183" alt="image" src="https://github.com/user-attachments/assets/c13b0545-fabc-4f91-9e15-1d721437e711" />
+
+Haré solo un envio y recepción.
