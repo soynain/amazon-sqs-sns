@@ -83,3 +83,24 @@ chatgepeteando. Los temas de concurrencia creo que serán muy importantes en el 
 
 Pasaremos con SNS. Ah otra cosa, hay una dependencia que es la spring cloud aws starter, esa no es compatible con Spring boot 4.0.o aun, si usas
 spring boot 3.5.+ esa libreria te hará las cosas mucho más fácil.
+
+# Avances 26/12/2025
+
+Ahora le seguimos con SNS, no haré una susbscription A2A, la haré a2p, porque es más orientado al fanout queue.
+El chiste en estas prácticas es entender los fundamentos de la síntaxis. No crear ecosistemas completos exceptuando la práctica
+de kubernetes. Solo la extenderemos si me rechazan en una oferta que ando persiguiendo.
+
+Creamos unos endpoints para creación del tópico
+
+<img width="1754" height="1330" alt="image" src="https://github.com/user-attachments/assets/b16eea9b-75c8-4f29-aeef-34466891a19a" />
+
+<img width="1410" height="933" alt="image" src="https://github.com/user-attachments/assets/6dbe42cf-0665-4d66-ba32-7feb554fa6da" />
+
+
+Responden bien
+
+<img width="935" height="214" alt="image" src="https://github.com/user-attachments/assets/c9641173-3438-4460-9253-40b71d5ba9a9" />
+
+<img width="1283" height="151" alt="image" src="https://github.com/user-attachments/assets/8cba6781-7434-4805-948b-e82165109f7e" />
+
+Tristemente y al parecer el plan gratuito no te deja mandar mensajes sms. 
