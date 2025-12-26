@@ -49,3 +49,37 @@ una implementación del propio stack de AWS, puedes usar S3, y cosas asi.
 <img width="580" height="183" alt="image" src="https://github.com/user-attachments/assets/c13b0545-fabc-4f91-9e15-1d721437e711" />
 
 Haré solo un envio y recepción.
+
+# Avances 25/12/2025 parte 2
+Modifiqué mi código inicial e hice unos endpoints sencillitos, uno para crear una cola, el que hice para consultar todas las colas:
+
+<img width="1048" height="169" alt="image" src="https://github.com/user-attachments/assets/a32e21a6-4610-4106-8d04-7e37df7f98d5" />
+
+Y otro para mandar un mensaje, aqui he estado leyendo un tópico interesante que es el tema del long polling, estuvo enredoso más que nada por la implemehnjtación
+de un worker sencillo, ya que no funciona por tcp, si no por pollings esta herramienta:
+
+
+<img width="1587" height="563" alt="image" src="https://github.com/user-attachments/assets/ebb2d883-5ec0-49ff-90da-ea99ce18aa14" />
+
+<img width="1546" height="708" alt="image" src="https://github.com/user-attachments/assets/707d53d0-eb6c-4e3b-a92d-5f1879f05a1f" />
+
+Es importante repasar el polling nativo. Creo el .waitTimeSeconds(20) detiene el hilo del mismo worker, de esos se encarga la libreria por debajo.
+
+Desde microa mandas el mensaje
+
+<img width="1694" height="178" alt="image" src="https://github.com/user-attachments/assets/63bf1c65-8083-43db-b217-f70ecb84ce5d" />
+
+<img width="1603" height="910" alt="image" src="https://github.com/user-attachments/assets/dd60af84-e15c-46c3-bef4-b44f2ff37544" />
+
+Y listo. Si tiene más complejidades de acuerdo al caso de uso pero no necesitamos extender el tópico. En si, ya hay un repo
+con fragmentos del codigo de acuerdo a tu caso de uso, aquí: https://github.com/awsdocs/aws-doc-sdk-examples/blob/main/javav2/example_code/sqs/src/main/java/com/example/sqs/SQSExample.java#L151
+
+Y en la docu de AWS SDK para SQS, ya hay escenarios listados: <img width="296" height="671" alt="image" src="https://github.com/user-attachments/assets/bd1b48bf-2821-4d8e-8d43-e15437a20404" />
+
+Con esto damos por concluido el apartado de SQS, pero si hay que leer y a lo mejor al adentrarnos al SNS, validar el tema del worker.
+
+Otra cosa, ahí harcodeamos el worker con el url pero también podemos pasarles parametros, por medio de un hashmap, me abstentaré a hacerlo, lo investigué
+chatgepeteando. Los temas de concurrencia creo que serán muy importantes en el futuro.... Asyncs y threads. No hay pex.
+
+Pasaremos con SNS. Ah otra cosa, hay una dependencia que es la spring cloud aws starter, esa no es compatible con Spring boot 4.0.o aun, si usas
+spring boot 3.5.+ esa libreria te hará las cosas mucho más fácil.
