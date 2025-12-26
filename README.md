@@ -104,3 +104,7 @@ Responden bien
 <img width="1283" height="151" alt="image" src="https://github.com/user-attachments/assets/8cba6781-7434-4805-948b-e82165109f7e" />
 
 Tristemente y al parecer el plan gratuito no te deja mandar mensajes sms. 
+
+Con esto acabamos la práctica de la sintaxis sencilla.......... bueno, veré si hago el fanout queue para profundizar y de ahí a leetcodear un poco más.
+
+Ahora dominamos la nube. Faltaria también Flink.
