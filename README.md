@@ -108,3 +108,115 @@ Tristemente y al parecer el plan gratuito no te deja mandar mensajes sms.
 Con esto acabamos la práctica de la sintaxis sencilla.......... bueno, veré si hago el fanout queue para profundizar y de ahí a leetcodear un poco más.
 
 Ahora dominamos la nube. Faltaria también Flink.
+
+
+# Conclusiones y comparativa
+
+Cuando aprendemos Kafka tendemos a poner atención en la herramienta pero no en su propósito real, si es una cola de eventos
+con particiones que respetan el orden de acuerdo al tópico, sin embargo esto funciona en sistemas
+event-driven, los eventos al ser enviados se quedan como logs sobre el handler de kafka. 
+
+¿Qué quiere decir esto? que, en un contexto event driven, el log se vuelve el eje sobre el sistema. Se vuelve un punto donde puedes tracear
+ese log, al igual que sus anteriores predecesores del log, a esto se le llama contratos y versionados de contratos. 
+
+Esos logs con contratos, deben ser inmutables, y versionados para reprocesados, de esa manera te permite detectar si hubieron errores previo a algún procesado superior o inferior.
+
+Es un log auxiliar, complementario a lo mejor a los logs tradicionales de micros que pudieras vincular con Kibana. Tu evento se vuelve el eje central.
+Claro, piensa en las particiones, y en como auditarlo más adelante, tal vez respaldando batches de logs en almacenamientos S3 de manera anual o por mes y/o periodo, o al corte del año
+borrarlos y tener espacio para nuevos, pero depende de las necesidades de auditoria y que tanto necesites esos logs. Son temas para sistemas REALMENTE GRANDES Y AUDITADOS.
+
+Los esquemas los puedes hacer por json normal, o por Avro y Protobuf, son dos herramientas externas que te ayudan
+a hacer esa configuración más gráfica. Solo lo profundizaré cuando llegue lejos en la oferta laboral que busco.
+
+A ciencia cierta, la diferencia radica entre los tipos:
+BACKWARD COMPATIBILITY:
+Producer v2  →  Consumer v1   ✅
+Producer v1  →  Consumer v2   ✅
+
+✔️ Permitido
+Agregar campos opcionales
+
+Agregar campos con default
+
+Quitar campos solo si no eran obligatorios
+
+❌ No permitido
+Agregar campos obligatorios
+
+Cambiar tipos
+
+Renombrar campos
+
+FORWARD COMPATIBILITY
+Producer v1  →  Consumer v2   ✅
+Producer v2  →  Consumer v1   ❌
+
+✔️ Permitido
+
+Quitar campos
+
+Ignorar campos antiguos
+
+Mantener tipos compatibles
+
+❌ No permitido
+
+Agregar campos que el consumer espera siempre
+
+Cambiar semántica
+
+
+Ahora con SQS/SNS los casos de uso cambian:
+Son colas más sencillas, directamente más conectadas con el ecosistema de AWS directamente, ofreciendote
+una cola sencilla para comunicación de tus servicios, ¿diferencia? los eventos no se guardan. Solo se entregan una vez y expiran.
+
+Por ejemplo analicemos el código de los mismos ejemplos de AWS, pero antes aclarar: SQS/SNS no guarda nada. SQS tiene un visibility time, al obtener un mensaje
+ese tiempo transcurre y tendrás ese tiempo para volver a traer ese mensaje. Cuando lo borres, dentro del margen del visibility desaparece de la cola. 
+Pero, a diferencia de kafka, no tiene retrys, es solo una vez!! amazon te puede dar los ids de los eventos que se perdieron y tu armas tu retry si algunos
+envios fallaron, algo que kafka facilita en cierto sentido.
+
+Aquí por ejemplo en el repo oficial lo muestra más que claro, tu programa tus retrys, tu impondrás ese control:
+
+<img width="1005" height="896" alt="image" src="https://github.com/user-attachments/assets/e86efa0a-36bf-468d-9a02-d395c0fc7b36" />
+
+Y como se constato antes, por workers se obtienen los mensajes, con long pulling, un hilo que se mantiene despierto por x tiempo para ahorrar costos. Eso va en coordinación con el delay de tus mensajes que configures
+y el tiempo de espera. También SQS te permite implementar el patrón fifo para que respete el orden. Kafka respeta el orden POR PARTICIONES. FIFO no admite duplicados tampoco.
+
+SQS también solo sigue una regla: un mensaje solo corresponde a un consumidor, no es FANOUT, si tienes multiples producers, no todos recibirán el mismo mensaje por ese hecho.
+
+Ahora, SNS! es un servicio de PUBSUB, más que de cola. Manda mensajes a consumers que pueden ser A2A o A2P. Puedes mandar eventos para desencadenar SMS, correos, lambdas,
+sms, y SQS's también, por eso se dice que puedes replicar el fanout si fusionas SNS /SQS. En sistemas medianos queda de perlas.
+
+SNS solo procesa si mandó el mensaje o no, a diferencia de SQS que si espera una confirmación de eliminación, muy importante tomar esta diferencia  y KAFKA depende de ti cuando tiempo los retengas.
+
+Creo era lo más coherente hacer esta reflexión final no solo por el tema de la sintaxis sencilla y la práctica fácil, pero para saber en que casos hay que usar estas herramientas.
+
+Las documentaciones de AWS ya tienen esos escenarios. SNS usalo en notificaciones 
+<img width="1463" height="871" alt="image" src="https://github.com/user-attachments/assets/e9fce89b-c996-4703-8257-2b2b95c2c48f" />
+
+SQS usalo en, batches de envío y eventos sencillos/medianos entre servicios o micros:
+
+<img width="1310" height="1023" alt="image" src="https://github.com/user-attachments/assets/71aefa37-1a45-486c-b501-6aa7f3d790b2" />
+
+Aquí se muestra un ejemplo sencillo para ello
+
+<img width="1001" height="657" alt="image" src="https://github.com/user-attachments/assets/fa154c7a-6ccb-4ac9-aa95-74cd03cffec1" />
+
+En SQS puedes mandar BINARIOS y objetos de S3!!!
+
+<img width="998" height="425" alt="image" src="https://github.com/user-attachments/assets/3222d350-ffd7-4fcf-8e17-04dcff754080" />
+
+Con SNS solo orquestas notificaciones de arranque.
+
+Piensa en esas posibilidades, no mandarás binarios por kafka, pero si por estos servicios. 
+El patrón inicial es SQS/SNS o RABBITMQ, redis o hazelcast a lo mejor.
+
+# Con esto se concluye las reflexiones
+
+No profundizaremos más, hasta después... de alcanzar ese valhalla.
+
+
+
+
+
+
